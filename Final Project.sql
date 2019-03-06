@@ -1,9 +1,7 @@
---DROP DATABASE Library_Management;
+--DROP DATABASE libraryManagementDB;
 --CREATE DATABASE libraryManagementDB;
 USE libraryManagementDB
 
-IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES libraryBranch)
-		DROP TABLE libraryBranch, publisher, books, bookAuthors, bookCopies, bookLoans, borrower;
 
 
 CREATE TABLE libraryBranch (
@@ -12,6 +10,7 @@ CREATE TABLE libraryBranch (
 	branchAddress VARCHAR(50) NOT NULL
 );
 
+
 CREATE TABLE publisher (
 	publisherName VARCHAR(30) PRIMARY KEY NOT NULL,
 	publisherAddress VARCHAR(50) NOT NULL,
@@ -19,27 +18,22 @@ CREATE TABLE publisher (
 );
 
 CREATE TABLE books (
-	bookID INT PRIMARY KEY NOT NULL IDENTITY (1000,1),
+	bookID INT PRIMARY KEY NOT NULL IDENTITY (1,1),
 	bookTitle VARCHAR(50) NOT NULL,
-	publisherName varchar(30) NOT NULL
+	publisherName varchar(30) FOREIGN KEY REFERENCES publisher(publisherName) NOT NULL
 );
+
 
 CREATE TABLE bookAuthors (
-	bookID INT PRIMARY KEY NOT NULL IDENTITY (1000,1),
-	AuthorName VARCHAR(30) NOT NULL
+	bookID INT FOREIGN KEY REFERENCES books(bookID) NOT NULL,
+	authorName VARCHAR(30) NOT NULL
 );
+
 
 CREATE TABLE bookCopies (
-	bookID INT PRIMARY KEY NOT NULL IDENTITY (1000,1),
-	branchID INT NOT NULL,
+	bookID INT FOREIGN KEY REFERENCES books(bookID) NOT NULL,
+	branchID INT FOREIGN KEY REFERENCES libraryBranch(branchID) NOT NULL,
 	NumberOfCopies INT NOT NULL 
-);
-
-CREATE TABLE bookLoans (
-	bookID INT PRIMARY KEY NOT NULL IDENTITY (1000,1),
-	branchID INT NOT NULL,
-	cardNum VARCHAR(30) NOT NULL, 
-	dateOut DATE NOT NULL
 );
 
 CREATE TABLE borrower (
@@ -49,13 +43,15 @@ CREATE TABLE borrower (
 	borrowerPhone VARCHAR(30) NOT NULL
 );
 
-CREATE TABLE libraryInfo (
-	libraryID INT PRIMARY KEY NOT NULL IDENTITY (1,1),
-	libraryBranchID INT NOT NULL CONSTRAINT fk_branch_ID FOREIGN KEY REFERENCES libraryBranch(branchID) ON UPDATE CASCADE ON DELETE CASCADE,
-	libraryBookID INT NOT NULL CONSTRAINT fk_book_ID FOREIGN KEY REFERENCES books(bookID) ON UPDATE CASCADE ON DELETE CASCADE,
-	libraryPubName VARCHAR(30) NOT NULL CONSTRAINT fk_pub_name FOREIGN KEY REFERENCES publisher(publisherName) ON UPDATE CASCADE ON DELETE CASCADE,
-	libraryCardNum VARCHAR(30) NOT NULL CONSTRAINT fk_card_num FOREIGN KEY REFERENCES borrower(cardNum) ON UPDATE CASCADE ON DELETE CASCADE
+CREATE TABLE bookLoans (
+	bookID INT FOREIGN KEY REFERENCES books(bookID) NOT NULL,
+	branchID INT FOREIGN KEY REFERENCES libraryBranch(branchID) NOT NULL,
+	cardNum VARCHAR(30) FOREIGN KEY REFERENCES borrower(cardNum) NOT NULL, 
+	dateOut DATE NOT NULL
 );
+
+
+
 
 
 INSERT INTO libraryBranch
@@ -66,6 +62,8 @@ INSERT INTO libraryBranch
 	('East', '7172 E Wyatt Blvd Springfield, OR'),
 	('West', '2525 W Chump St Springfield, OR')
 	;
+
+
 
 INSERT INTO publisher
 	(publisherName, publisherAddress, publisherPhone)
@@ -83,6 +81,8 @@ INSERT INTO publisher
 	('WILLIAM MORROW', '4585 Iam Bored LN Town Center, MA  12302', '484-651-9876'),
 	('HARPERIMPULSE', '5 Fortnight Row  Blantington, OL  12587', '789-965-3214')
 	;
+
+
 
 INSERT INTO books
 	(bookTitle, publisherName)
@@ -104,13 +104,14 @@ INSERT INTO books
 	('Edge of Eternity', 'PENGUIN BOOKS'),
 	('The Perfect Child', 'THOMAS & MERCER'),
 	('The Victory Garden', 'LAKE UNION PUBLISHING'),
-	('The Storyteller''s Secret', 'LAKE UNION PUBLISHING'),
-	('The Border', 'WILLIAM MORROW'),
-	('The Secret Orphan', 'HARPERIMPULSE')
+	('The Lost Tribe', 'Henry Holt & Co'),
+	('Christine', 'WILLIAM MORROW'),
+	('The Dark Tower', 'HARPERIMPULSE')
 	;
 
+
 INSERT INTO bookAuthors
-	(AuthorName)
+	(authorName)
 	VALUES
 	('DELIA OWENS'),
 	('ALEX MICHAELIDES'),
@@ -129,11 +130,26 @@ INSERT INTO bookAuthors
 	('KEN FOLLETT'),
 	('LUCINDA BERRY'),
 	('RHYS BOWEN'),
-	('SEJAL BADANI'),
-	('DON WINSLOW'),
-	('GLYNIS PETERS')
+	('EDWARD MARRIOT'),
+	('STEPHEN KING')
 	;
 
-INSERT INTO 
+
+
+
+INSERT INTO bookLoans
+	
+
+
+
+
+
+INSERT INTO borrower
+
+
+*/
+
+
+
 
 
