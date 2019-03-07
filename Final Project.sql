@@ -1,8 +1,9 @@
 --DROP DATABASE libraryManagementDB;
 --CREATE DATABASE libraryManagementDB;
+GO
 USE libraryManagementDB
 
-
+GO
 
 CREATE TABLE libraryBranch (
 	branchID INT PRIMARY KEY NOT NULL IDENTITY (1,1),
@@ -49,8 +50,6 @@ CREATE TABLE bookLoans (
 	dateOut DATE NOT NULL,
 	dateDue DATE NOT NULL
 );
-
-
 
 
 INSERT INTO libraryBranch
@@ -154,6 +153,10 @@ INSERT INTO borrower
 INSERT INTO bookLoans
 	(bookID, branchID, cardNum, dateOut, dateDue)
 	VALUES
+	(15, 1, '123ask', '2019-02-05', '2019-03-07'),
+	(14, 1, '123fgl', '2019-02-05', '2019-03-07'),
+	(12, 1, '123sdf', '2019-02-06', '2019-03-08'),
+	(13, 1, '123fgl', '2019-02-06', '2019-03-08'),
 	(1, 1, '123sdf', '2019-12-12', '2020-01-12'),
 	(16, 1, '123sdf', '2019-12-12', '2020-01-12'),
 	(2, 3, '123qwr', '2019-5-12', '2019-6-12'),
@@ -248,7 +251,7 @@ INSERT INTO bookCopies
 	(19, 3, 12),
 	(19, 4, 5),
 	(20, 1, 15),
-	(20, 2, 13),
+	(20, 2, 3),
 	(20, 3, 12),
 	(20, 4, 5)
 ;
@@ -297,3 +300,75 @@ SELECT
 GO
 
 EXEC [dbo].[uspInactiveBorrowers]
+
+USE libraryManagementDB
+
+/*4.) For each book that is loaned out from the "Sharpstown" branch and whose DueDate is today, 
+retrieve the book title, the borrower's name, and the borrower's address.*/
+
+GO
+CREATE PROC dbo.uspDueToday
+AS
+SELECT
+	borrowerName AS 'Patron Name', borrowerAddress AS 'Patron Address', 
+	books.bookTitle AS 'Book Title', bookLoans.dateDue AS 'Due Date', libraryBranch.branchName AS 'Branch Name'
+	FROM borrower
+	INNER JOIN bookLoans ON borrower.cardNum = bookLoans.cardNum 
+	INNER JOIN books ON  bookLoans.bookID = books.bookID
+	INNER JOIN libraryBranch ON bookLoans.branchID = libraryBranch.branchID
+	WHERE dateDue = '2019-03-07' AND libraryBranch.branchName = 'sharpstown';
+GO
+
+
+EXEC [dbo].[uspDueToday]
+
+/*5.) For each library branch, retrieve the branch name and the total number of books loaned out from that branch.*/
+
+GO
+CREATE PROC dbo.uspBooksNumber
+AS
+SELECT
+	libraryBranch.branchName AS 'Branch Name', COUNT(bookLoans.bookID) AS 'Books On Loan' 
+	FROM libraryBranch
+	INNER JOIN bookLoans ON libraryBranch.branchID = bookLoans.branchID
+	GROUP BY branchName;
+GO
+
+EXEC[dbo].[uspBooksNumber]	
+
+
+/*6.) Retrieve the names, addresses, and the number of books 
+checked out for all borrowers who have more than five books checked out.*/
+
+GO
+CREATE PROC dbo.uspOverFive
+AS
+SELECT
+	borrower.borrowerName,borrower.borrowerAddress, COUNT(bookLoans.bookID) AS 'Amount On Loan'
+	FROM borrower
+	INNER JOIN bookLoans ON borrower.cardNum = bookLoans.cardNum
+	GROUP BY borrowerName, borrowerAddress
+	HAVING COUNT(bookLoans.bookID) > 5;
+GO
+
+EXEC [dbo].[uspOverFive]
+	
+/*7.) For each book authored (or co-authored) by "Stephen King", retrieve the title 
+and the number of copies owned by the library branch whose name is "Central".*/
+GO
+CREATE PROC dbo.StephenKing
+AS
+SELECT
+	books.bookTitle, bookAuthors.authorName, libraryBranch.branchName, bookCopies.NumberOfCopies AS 'Quantity'
+	FROM books
+	INNER JOIN bookAuthors ON books.bookID = bookAuthors.bookID
+	INNER JOIN bookCopies ON bookAuthors.bookID = bookCopies.bookID
+	INNER JOIN libraryBranch ON bookCopies.branchID = libraryBranch.branchID
+	WHERE authorName = 'STEPHEN KING' and branchName = 'Central'
+;
+GO
+
+EXEC [dbo].[StephenKing]
+
+
+
