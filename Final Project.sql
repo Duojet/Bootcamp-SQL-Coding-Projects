@@ -230,18 +230,18 @@ INSERT INTO bookCopies
 	(15, 2, 13),
 	(15, 3, 12),
 	(15, 4, 5),
-	(15, 1, 15),
-	(15, 2, 13),
-	(15, 3, 12),
-	(15, 4, 5),
-	(15, 1, 15),
-	(15, 2, 13),
-	(15, 3, 12),
-	(15, 4, 5),
-	(15, 1, 15),
-	(15, 2, 13),
-	(15, 3, 12),
-	(15, 4, 5),
+	(16, 1, 15),
+	(16, 2, 13),
+	(16, 3, 12),
+	(16, 4, 5),
+	(17, 1, 15),
+	(17, 2, 13),
+	(17, 3, 12),
+	(17, 4, 5),
+	(18, 1, 15),
+	(18, 2, 13),
+	(18, 3, 12),
+	(18, 4, 5),
 	(19, 1, 15),
 	(19, 2, 13),
 	(19, 3, 12),
@@ -252,8 +252,18 @@ INSERT INTO bookCopies
 	(20, 4, 5)
 ;
 
-
-
+USE libraryManagementDB
+--How many copies of the book titled "The Lost Tribe" are owned by the library branch whose name is "Sharpstown"?
+GO
+CREATE PROC dbo.uspCountLostTribe1 @CountLost INT
+AS
+SELECT  
+	NumberOfCopies AS 'Number Of Copies', books.bookTitle AS 'Title', libraryBranch.branchName AS 'Branch Name'
+	FROM bookCopies
+	INNER JOIN books ON books.bookID = bookCopies.bookID
+	INNER JOIN libraryBranch ON libraryBranch.branchID = bookCopies.branchID
+	WHERE bookTitle = 'The Lost Tribe' AND branchName = 'sharpstown'
+	;
 
 
 
