@@ -46,9 +46,9 @@ CREATE TABLE bookLoans (
 	bookID INT FOREIGN KEY REFERENCES books(bookID) NOT NULL,
 	branchID INT FOREIGN KEY REFERENCES libraryBranch(branchID) NOT NULL,
 	cardNum VARCHAR(30) FOREIGN KEY REFERENCES borrower(cardNum) NOT NULL, 
-	dateOut DATE NOT NULL
+	dateOut DATE NOT NULL,
+	dateDue DATE NOT NULL
 );
-
 
 
 
@@ -140,6 +140,7 @@ INSERT INTO bookAuthors
 INSERT INTO borrower
 	(cardNum, borrowerName, borrowerAddress, borrowerPhone)
 	VALUES
+	('123fay', 'My Name', '58117 St. Portand, OR  97214', '503-741-6920'),
 	('123sdf', 'Joe Bob', '1234 SE Burbon St. Portand, OR  97951', '503-123-4567'),
 	('123qwr', 'Jenny Todd', '1475 SE Tooms Rd. Portand, OR  97615', '503-123-8756'),
 	('123asd', 'Bilbo Baggins', '1010 N Shire Ct. Portand, OR  97132', '503-258-9632'),
@@ -151,26 +152,26 @@ INSERT INTO borrower
 	;
 
 INSERT INTO bookLoans
-	(bookID, branchID, cardNum, dateOut)
+	(bookID, branchID, cardNum, dateOut, dateDue)
 	VALUES
-	(1, 1, '123sdf', '2019-12-12'),
-	(16, 1, '123sdf', '2019-12-12'),
-	(2, 3, '123qwr', '2019-5-12'),
-	(5, 3, '123qwr', '2019-5-12'),
-	(8, 3, '123qwr', '2019-5-12'),
-	(10, 3,'123qwr', '2019-5-12'),  
-	(11, 3, '123qwr', '2019-5-12'),
-	(12, 3, '123qwr', '2019-5-12'),
-	(14, 3, '123qwr', '2019-5-12'),
-	(15, 3,'123qwr', '2019-5-12'),
-	(4, 2, '123fgl', '2019-3-25'),
-	(6, 2, '123fgl', '2019-3-25'),
-	(8, 2, '123fgl', '2019-3-25'),
-	(9, 2, '123fgl', '2019-3-26'),
-	(11, 4, '123fgl', '2019-3-27'),
-	(13, 4, '123fgl', '2019-3-27'),
-	(20, 4, '123fgl', '2019-3-27'),
-	(19, 2, '123fgl', '2019-4-15')
+	(1, 1, '123sdf', '2019-12-12', '2020-01-12'),
+	(16, 1, '123sdf', '2019-12-12', '2020-01-12'),
+	(2, 3, '123qwr', '2019-5-12', '2019-6-12'),
+	(5, 3, '123qwr', '2019-5-12', '2019-6-12'),
+	(8, 3, '123qwr', '2019-5-12', '2019-6-12'),
+	(10, 3,'123qwr', '2019-5-12', '2019-6-12'),  
+	(11, 3, '123qwr', '2019-5-12', '2019-6-12'),
+	(12, 3, '123qwr', '2019-5-12', '2019-6-12'),
+	(14, 3, '123qwr', '2019-5-12', '2019-6-12'),
+	(15, 3,'123qwr', '2019-5-12', '2019-6-12'),
+	(4, 2, '123fgl', '2019-3-25', '2019-4-25'),
+	(6, 2, '123fgl', '2019-3-25', '2019-4-25'),
+	(8, 2, '123fgl', '2019-3-25', '2019-4-25'),
+	(9, 2, '123fgl', '2019-3-26', '2019-4-26'),
+	(11, 4, '123fgl', '2019-3-27', '2019-4-27'),
+	(13, 4, '123fgl', '2019-3-27', '2019-4-27'),
+	(20, 4, '123fgl', '2019-3-27', '2019-4-27'),
+	(19, 2, '123fgl', '2019-4-15', '2019-5-15')
 	;
 
 
@@ -255,7 +256,7 @@ INSERT INTO bookCopies
 USE libraryManagementDB
 --How many copies of the book titled "The Lost Tribe" are owned by the library branch whose name is "Sharpstown"?
 GO
-CREATE PROC dbo.uspCountLostTribe1 @CountLost INT
+CREATE PROC dbo.uspCountLostTribe1
 AS
 SELECT  
 	NumberOfCopies AS 'Number Of Copies', books.bookTitle AS 'Title', libraryBranch.branchName AS 'Branch Name'
@@ -264,16 +265,35 @@ SELECT
 	INNER JOIN libraryBranch ON libraryBranch.branchID = bookCopies.branchID
 	WHERE bookTitle = 'The Lost Tribe' AND branchName = 'sharpstown'
 	;
+GO
 
+EXEC [dbo].[uspCountLostTribe1]
 
+--How many copies of the book titled "The Lost Tribe" are owned by each library branch?	
+GO
+CREATE PROC dbo.uspCountLostTribeAll
+AS
+SELECT  
+	NumberOfCopies AS 'Number Of Copies', books.bookTitle AS 'Title', libraryBranch.branchName AS 'Branch Name'
+	FROM bookCopies
+	INNER JOIN books ON books.bookID = bookCopies.bookID
+	INNER JOIN libraryBranch ON libraryBranch.branchID = bookCopies.branchID
+	WHERE bookTitle = 'The Lost Tribe'
+	;
+GO
 
+EXEC [dbo].[uspCountLostTribeAll]
 
+--Retrieve the names of all borrowers who do not have any books checked out.
+GO
+CREATE PROC dbo.uspInactiveBorrowers
+AS
+SELECT 
+	borrowerName AS 'No Books Checked Out'
+	FROM borrower 
+	FULL OUTER JOIN bookLoans ON borrower.cardNum = bookLoans.cardNum
+	WHERE bookLoans.cardNum IS NULL 
+	;
+GO
 
-
-
-
-
-
-
-
-
+EXEC [dbo].[uspInactiveBorrowers]
